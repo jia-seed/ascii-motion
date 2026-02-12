@@ -7,33 +7,8 @@ import { HoverBorderGradient } from './ui/hover-border-gradient';
 import ShinyText from './ShinyText';
 import { imageToAsciiSvg, createAsciiSvgAnimation, type AsciiSvgResult } from '@/lib/ascii';
 
-// ─── demo ascii art that plays in the hero ───
-const DEMO_FRAMES = [
-  `    .---.
-   /     \\
-  | () () |
-   \\  ^  /
-    |||||
-    |||||`,
-  `    .---.
-   /     \\
-  | (o)(o)|
-   \\  ^  /
-    |||||
-    |||||`,
-  `    .---.
-   /     \\
-  | () () |
-   \\  o  /
-    |||||
-    |||||`,
-  `    .---.
-   /     \\
-  | (o)(o)|
-   \\  o  /
-    |||||
-    |||||`,
-];
+// ─── ascii ramp for character scrambling ───
+const SCRAMBLE_CHARS = '@#%&*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,"^`. ';
 
 // ─── navbar ───
 function Navbar() {
@@ -66,21 +41,75 @@ function Navbar() {
 }
 
 // ─── hero ascii demo animation ───
-function HeroAsciiDemo() {
-  const [frameIndex, setFrameIndex] = useState(0);
+interface SvgChar {
+  x: string;
+  y: string;
+  char: string;
+}
 
+function HeroAsciiDemo() {
+  const [chars, setChars] = useState<SvgChar[]>([]);
+  const baseChars = useRef<SvgChar[]>([]);
+  const svgSize = useRef({ width: '996', height: '990' });
+
+  // fetch and parse the SVG once
   useEffect(() => {
-    const interval = setInterval(() => {
-      setFrameIndex((prev) => (prev + 1) % DEMO_FRAMES.length);
-    }, 400);
-    return () => clearInterval(interval);
+    fetch('/ascii-hero.svg')
+      .then((res) => res.text())
+      .then((svgText) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgEl = doc.querySelector('svg');
+        if (svgEl) {
+          svgSize.current.width = svgEl.getAttribute('width') || '996';
+          svgSize.current.height = svgEl.getAttribute('height') || '990';
+        }
+        const textEls = doc.querySelectorAll('text');
+        const parsed: SvgChar[] = [];
+        textEls.forEach((el) => {
+          parsed.push({
+            x: el.getAttribute('x') || '0',
+            y: el.getAttribute('y') || '0',
+            char: el.textContent || '',
+          });
+        });
+        baseChars.current = parsed;
+        setChars(parsed);
+      });
   }, []);
+
+  // scramble characters on interval, keeping positions
+  useEffect(() => {
+    if (baseChars.current.length === 0) return;
+    const interval = setInterval(() => {
+      setChars(
+        baseChars.current.map((c) => ({
+          ...c,
+          char: SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)],
+        }))
+      );
+    }, 300);
+    return () => clearInterval(interval);
+  }, [chars.length]);
+
+  if (chars.length === 0) return null;
 
   return (
     <div className="relative w-full flex items-center justify-center">
-      <pre className="text-neutral-300 text-xs sm:text-sm font-mono leading-tight whitespace-pre select-none">
-        {DEMO_FRAMES[frameIndex]}
-      </pre>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${svgSize.current.width} ${svgSize.current.height}`}
+        className="select-none"
+      >
+        <style>{`text { font-family: monospace; font-size: 8px; fill: #d4d4d4; }`}</style>
+        {chars.map((c, i) => (
+          <text key={i} x={c.x} y={c.y}>
+            {c.char}
+          </text>
+        ))}
+      </svg>
     </div>
   );
 }
