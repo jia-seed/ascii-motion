@@ -47,7 +47,7 @@ interface SvgChar {
   char: string;
 }
 
-function HeroAsciiDemo({ speed, density }: { speed: number; density: number }) {
+function HeroAsciiDemo({ speed, density, color }: { speed: number; density: number; color: string }) {
   const [chars, setChars] = useState<SvgChar[]>([]);
   const allChars = useRef<SvgChar[]>([]);
   const baseChars = useRef<SvgChar[]>([]);
@@ -114,7 +114,7 @@ function HeroAsciiDemo({ speed, density }: { speed: number; density: number }) {
         viewBox={`0 0 ${svgSize.current.width} ${svgSize.current.height}`}
         className="select-none"
       >
-        <style>{`text { font-family: monospace; font-size: 8px; fill: #d4d4d4; }`}</style>
+        <style>{`text { font-family: monospace; font-size: 8px; fill: ${color}; }`}</style>
         {chars.map((c, i) => (
           <text key={i} x={c.x} y={c.y}>
             {c.char}
@@ -310,6 +310,7 @@ function TryItSection() {
   const [density, setDensity] = useState(6);
   const [speed, setSpeed] = useState(150);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [color, setColor] = useState('#d4d4d4');
   const [fileName, setFileName] = useState('ascii-motion');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -331,14 +332,15 @@ function TryItSection() {
         cellWidth: density,
         cellHeight: Math.round(density * 1.5),
         maxWidth: 120,
+        color,
       });
-      const animationFrames = createAsciiSvgAnimation(baseResult, 8);
+      const animationFrames = createAsciiSvgAnimation(baseResult, 8, { color });
       setFrames(animationFrames);
       setDimensions({ cols: baseResult.gridCols, rows: baseResult.gridRows });
       setCurrentFrame(0);
     };
     img.src = imageSrc;
-  }, [imageSrc, density]);
+  }, [imageSrc, density, color]);
 
   const processImage = useCallback((file: File) => {
     const reader = new FileReader();
@@ -459,6 +461,15 @@ function TryItSection() {
               />
               <span className="text-neutral-500 text-xs w-8">{speed}ms</span>
             </label>
+            <label className="flex items-center gap-2 text-neutral-400 text-sm">
+              <span>color</span>
+              <input
+                type="color"
+                value={color}
+                onChange={(e) => setColor(e.target.value)}
+                className="w-6 h-6 rounded cursor-pointer border-none bg-transparent [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch]:border-none"
+              />
+            </label>
             <button
               onClick={() => setIsAnimating(!isAnimating)}
               className="text-sm text-neutral-400 hover:text-white transition-colors"
@@ -503,6 +514,7 @@ function TryItSection() {
 export default function Landing() {
   const [heroDensity, setHeroDensity] = useState(10);
   const [heroSpeed, setHeroSpeed] = useState(300);
+  const [heroColor, setHeroColor] = useState('#d4d4d4');
 
   const features = [
     {
@@ -608,9 +620,18 @@ export default function Landing() {
                 />
                 <span className="text-neutral-500 text-xs w-8">{heroSpeed}ms</span>
               </label>
+              <label className="flex items-center gap-2 text-neutral-400 text-sm">
+                <span>color</span>
+                <input
+                  type="color"
+                  value={heroColor}
+                  onChange={(e) => setHeroColor(e.target.value)}
+                  className="w-6 h-6 rounded cursor-pointer border-none bg-transparent [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch]:border-none"
+                />
+              </label>
             </div>
             <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 w-full max-w-md">
-              <HeroAsciiDemo speed={heroSpeed} density={heroDensity} />
+              <HeroAsciiDemo speed={heroSpeed} density={heroDensity} color={heroColor} />
             </div>
           </div>
         </div>
