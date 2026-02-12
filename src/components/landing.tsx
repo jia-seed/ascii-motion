@@ -269,6 +269,7 @@ function TryItSection() {
   const [isAnimating, setIsAnimating] = useState(true);
   const [density, setDensity] = useState(6);
   const [speed, setSpeed] = useState(150);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // animation loop
@@ -280,28 +281,31 @@ function TryItSection() {
     return () => clearInterval(interval);
   }, [frames, isAnimating, speed]);
 
-  const processImage = useCallback(
-    (file: File) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const baseResult = imageToAsciiSvg(img, {
-            cellWidth: density,
-            cellHeight: Math.round(density * 1.5),
-            maxWidth: 120,
-          });
-          const animationFrames = createAsciiSvgAnimation(baseResult, 8);
-          setFrames(animationFrames);
-          setDimensions({ cols: baseResult.gridCols, rows: baseResult.gridRows });
-          setCurrentFrame(0);
-        };
-        img.src = e.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    },
-    [density]
-  );
+  // reprocess when density changes or a new image is loaded
+  useEffect(() => {
+    if (!imageSrc) return;
+    const img = new Image();
+    img.onload = () => {
+      const baseResult = imageToAsciiSvg(img, {
+        cellWidth: density,
+        cellHeight: Math.round(density * 1.5),
+        maxWidth: 120,
+      });
+      const animationFrames = createAsciiSvgAnimation(baseResult, 8);
+      setFrames(animationFrames);
+      setDimensions({ cols: baseResult.gridCols, rows: baseResult.gridRows });
+      setCurrentFrame(0);
+    };
+    img.src = imageSrc;
+  }, [imageSrc, density]);
+
+  const processImage = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImageSrc(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
