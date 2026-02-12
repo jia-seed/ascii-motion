@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { HoverBorderGradient } from './ui/hover-border-gradient';
 import ShinyText from './ShinyText';
-import { imageToAscii, createAsciiAnimation, type AsciiFrame } from '@/lib/ascii';
+import { imageToAsciiSvg, createAsciiSvgAnimation, type AsciiSvgResult } from '@/lib/ascii';
 
 // ─── demo ascii art that plays in the hero ───
 const DEMO_FRAMES = [
@@ -78,7 +78,7 @@ function HeroAsciiDemo() {
 
   return (
     <div className="relative w-full flex items-center justify-center">
-      <pre className="text-teal-400 text-xs sm:text-sm font-mono leading-tight whitespace-pre select-none">
+      <pre className="text-neutral-300 text-xs sm:text-sm font-mono leading-tight whitespace-pre select-none">
         {DEMO_FRAMES[frameIndex]}
       </pre>
     </div>
@@ -145,7 +145,7 @@ function SkeletonUpload() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 10, opacity: 0 }}
               transition={{ duration: 0.4, ease: 'easeOut' }}
-              className="text-teal-500 text-2xl"
+              className="text-white text-2xl"
             >
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <rect x="4" y="2" width="16" height="20" rx="2" />
@@ -189,7 +189,7 @@ function SkeletonAnalyze() {
         }} />
         {/* scan line */}
         <motion.div
-          className="absolute left-0 right-0 h-0.5 bg-teal-500"
+          className="absolute left-0 right-0 h-0.5 bg-white"
           style={{ top: `${scanY}%` }}
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 0.8, repeat: Infinity }}
@@ -221,7 +221,7 @@ function SkeletonConvert() {
 
   return (
     <div className="relative flex py-6 h-full items-center justify-center">
-      <pre className="text-teal-400 text-[10px] font-mono leading-tight whitespace-pre select-none">
+      <pre className="text-neutral-300 text-[10px] font-mono leading-tight whitespace-pre select-none">
         {grid.join('\n')}
       </pre>
       <div className="absolute bottom-0 z-40 inset-x-0 h-10 bg-gradient-to-t from-black to-transparent w-full pointer-events-none" />
@@ -251,7 +251,7 @@ function SkeletonAnimate() {
         key={idx}
         initial={{ opacity: 0.5 }}
         animate={{ opacity: 1 }}
-        className="text-teal-400 text-xs font-mono leading-tight whitespace-pre select-none"
+        className="text-neutral-300 text-xs font-mono leading-tight whitespace-pre select-none"
       >
         {frames[idx]}
       </motion.pre>
@@ -263,7 +263,8 @@ function SkeletonAnimate() {
 // ─── try it section (upload + convert + display) ───
 function TryItSection() {
   const [isDragging, setIsDragging] = useState(false);
-  const [frames, setFrames] = useState<AsciiFrame[] | null>(null);
+  const [frames, setFrames] = useState<string[] | null>(null);
+  const [dimensions, setDimensions] = useState({ cols: 0, rows: 0 });
   const [currentFrame, setCurrentFrame] = useState(0);
   const [isAnimating, setIsAnimating] = useState(true);
   const [density, setDensity] = useState(6);
@@ -285,13 +286,14 @@ function TryItSection() {
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-          const baseFrame = imageToAscii(img, {
+          const baseResult = imageToAsciiSvg(img, {
             cellWidth: density,
             cellHeight: Math.round(density * 1.5),
             maxWidth: 120,
           });
-          const animationFrames = createAsciiAnimation(baseFrame, 8);
+          const animationFrames = createAsciiSvgAnimation(baseResult, 8);
           setFrames(animationFrames);
+          setDimensions({ cols: baseResult.gridCols, rows: baseResult.gridRows });
           setCurrentFrame(0);
         };
         img.src = e.target?.result as string;
@@ -325,12 +327,11 @@ function TryItSection() {
 
   const handleDownload = useCallback(() => {
     if (!frames) return;
-    const text = frames[currentFrame].lines.join('\n');
-    const blob = new Blob([text], { type: 'text/plain' });
+    const blob = new Blob([frames[currentFrame]], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ascii-motion.txt';
+    a.download = 'ascii-motion.svg';
     a.click();
     URL.revokeObjectURL(url);
   }, [frames, currentFrame]);
@@ -353,8 +354,8 @@ function TryItSection() {
         className={cn(
           'max-w-2xl mx-auto border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all',
           isDragging
-            ? 'border-teal-500 bg-teal-900/20'
-            : 'border-neutral-800 bg-neutral-900/50 hover:border-teal-700 hover:bg-neutral-900'
+            ? 'border-white bg-white/5'
+            : 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-600 hover:bg-neutral-900'
         )}
       >
         <input
@@ -396,7 +397,7 @@ function TryItSection() {
                 max="12"
                 value={density}
                 onChange={(e) => setDensity(Number(e.target.value))}
-                className="accent-teal-500 w-24"
+                className="accent-white w-24"
               />
               <span className="text-neutral-500 text-xs w-4">{density}</span>
             </label>
@@ -409,19 +410,19 @@ function TryItSection() {
                 step="50"
                 value={speed}
                 onChange={(e) => setSpeed(Number(e.target.value))}
-                className="accent-teal-500 w-24"
+                className="accent-white w-24"
               />
               <span className="text-neutral-500 text-xs w-8">{speed}ms</span>
             </label>
             <button
               onClick={() => setIsAnimating(!isAnimating)}
-              className="text-sm text-neutral-400 hover:text-teal-400 transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
             >
               {isAnimating ? 'pause' : 'play'}
             </button>
             <button
               onClick={handleDownload}
-              className="text-sm text-neutral-400 hover:text-teal-400 transition-colors"
+              className="text-sm text-neutral-400 hover:text-white transition-colors"
             >
               download
             </button>
@@ -432,14 +433,10 @@ function TryItSection() {
             <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-neutral-800">
               <span className="text-sm text-neutral-400">output</span>
               <span className="text-xs text-neutral-600">
-                {frames[0].width}x{frames[0].height}
+                {dimensions.cols}x{dimensions.rows}
               </span>
             </div>
-            <div className="p-4 overflow-x-auto">
-              <pre className="text-teal-400 text-[10px] sm:text-xs font-mono leading-tight whitespace-pre select-all">
-                {frames[currentFrame].lines.join('\n')}
-              </pre>
-            </div>
+            <div className="p-4 overflow-x-auto" dangerouslySetInnerHTML={{ __html: frames[currentFrame] }} />
           </div>
         </div>
       )}
@@ -500,7 +497,7 @@ export default function Landing() {
 
             <button
               onClick={() => document.getElementById('try-it')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center gap-3 bg-teal-900 hover:bg-teal-800 border border-teal-700 hover:border-teal-500 text-white px-6 py-3 rounded-lg font-mono text-sm cursor-pointer transition-all relative overflow-hidden"
+              className="inline-flex items-center gap-3 bg-white hover:bg-neutral-200 border border-neutral-300 hover:border-white text-black px-6 py-3 rounded-lg font-mono text-sm cursor-pointer transition-all relative overflow-hidden"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
                 backgroundBlendMode: 'overlay',
