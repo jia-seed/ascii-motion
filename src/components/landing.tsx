@@ -557,7 +557,7 @@ export default function Landing() {
 
           {/* right: demo */}
           <div className="flex flex-col items-center justify-center">
-            <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-8 w-full max-w-sm">
+            <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 w-full max-w-md">
               <HeroAsciiDemo />
             </div>
             <p className="text-xs text-neutral-500 text-center mt-4 max-w-xs leading-relaxed">
