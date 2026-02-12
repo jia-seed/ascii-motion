@@ -270,6 +270,7 @@ function TryItSection() {
   const [density, setDensity] = useState(6);
   const [speed, setSpeed] = useState(150);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [fileName, setFileName] = useState('ascii-motion');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // animation loop
@@ -335,10 +336,10 @@ function TryItSection() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'ascii-motion.svg';
+    a.download = `${fileName || 'ascii-motion'}.svg`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [frames, currentFrame]);
+  }, [frames, currentFrame, fileName]);
 
   return (
     <div id="try-it" className="mt-20 px-4 md:px-8 scroll-mt-20">
@@ -424,12 +425,22 @@ function TryItSection() {
             >
               {isAnimating ? 'pause' : 'play'}
             </button>
-            <button
-              onClick={handleDownload}
-              className="text-sm text-neutral-400 hover:text-white transition-colors"
-            >
-              download
-            </button>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="text"
+                value={fileName}
+                onChange={(e) => setFileName(e.target.value)}
+                placeholder="file name"
+                className="bg-neutral-800 border border-neutral-700 rounded px-2 py-0.5 text-sm text-neutral-300 w-32 focus:outline-none focus:border-neutral-500 placeholder:text-neutral-600"
+              />
+              <span className="text-xs text-neutral-600">.svg</span>
+              <button
+                onClick={handleDownload}
+                className="text-sm text-neutral-400 hover:text-white transition-colors ml-1"
+              >
+                download
+              </button>
+            </div>
           </div>
 
           {/* ascii display */}
