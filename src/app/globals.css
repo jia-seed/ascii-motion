@@ -51,6 +51,8 @@ html, body {
   padding: 0;
   background: #000;
   color: var(--foreground);
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 300;
 }
 
 :root {

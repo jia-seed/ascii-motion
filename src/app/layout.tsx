@@ -1,13 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-  fallback: ["system-ui", "sans-serif"],
-});
 
 export const metadata: Metadata = {
   title: "ascii motion",
@@ -24,10 +16,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} antialiased`}
-        style={{ fontFamily: 'var(--font-inter), sans-serif' }}
-      >
+      <head>
+        <link
+          href="https://api.fontshare.com/v2/css?f[]=satoshi@1&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased">
         {children}
       </body>
     </html>
