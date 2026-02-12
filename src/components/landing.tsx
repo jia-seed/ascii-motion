@@ -47,8 +47,9 @@ interface SvgChar {
   char: string;
 }
 
-function HeroAsciiDemo() {
+function HeroAsciiDemo({ speed, density }: { speed: number; density: number }) {
   const [chars, setChars] = useState<SvgChar[]>([]);
+  const allChars = useRef<SvgChar[]>([]);
   const baseChars = useRef<SvgChar[]>([]);
   const svgSize = useRef({ width: '996', height: '990' });
 
@@ -73,10 +74,20 @@ function HeroAsciiDemo() {
             char: el.textContent || '',
           });
         });
+        allChars.current = parsed;
         baseChars.current = parsed;
         setChars(parsed);
       });
   }, []);
+
+  // resample characters when density changes
+  useEffect(() => {
+    if (allChars.current.length === 0) return;
+    const step = Math.max(1, Math.round(11 - density));
+    const sampled = allChars.current.filter((_, i) => i % step === 0);
+    baseChars.current = sampled;
+    setChars(sampled);
+  }, [density]);
 
   // scramble characters on interval, keeping positions
   useEffect(() => {
@@ -88,9 +99,9 @@ function HeroAsciiDemo() {
           char: SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)],
         }))
       );
-    }, 300);
+    }, speed);
     return () => clearInterval(interval);
-  }, [chars.length]);
+  }, [speed, baseChars.current]);
 
   if (chars.length === 0) return null;
 
@@ -479,6 +490,9 @@ function TryItSection() {
 
 // ─── main landing component ───
 export default function Landing() {
+  const [heroDensity, setHeroDensity] = useState(10);
+  const [heroSpeed, setHeroSpeed] = useState(300);
+
   const features = [
     {
       title: 'upload',
@@ -558,11 +572,35 @@ export default function Landing() {
           {/* right: demo */}
           <div className="flex flex-col items-center justify-center">
             <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 w-full max-w-md">
-              <HeroAsciiDemo />
+              <HeroAsciiDemo speed={heroSpeed} density={heroDensity} />
             </div>
-            <p className="text-xs text-neutral-500 text-center mt-4 max-w-xs leading-relaxed">
-              ascii art converts images into text characters, mapping pixel brightness to character density.
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-5 mt-4">
+              <label className="flex items-center gap-2 text-neutral-400 text-sm">
+                <span>density</span>
+                <input
+                  type="range"
+                  min="1"
+                  max="10"
+                  value={heroDensity}
+                  onChange={(e) => setHeroDensity(Number(e.target.value))}
+                  className="accent-white w-20"
+                />
+                <span className="text-neutral-500 text-xs w-4">{heroDensity}</span>
+              </label>
+              <label className="flex items-center gap-2 text-neutral-400 text-sm">
+                <span>speed</span>
+                <input
+                  type="range"
+                  min="50"
+                  max="500"
+                  step="50"
+                  value={heroSpeed}
+                  onChange={(e) => setHeroSpeed(Number(e.target.value))}
+                  className="accent-white w-20"
+                />
+                <span className="text-neutral-500 text-xs w-8">{heroSpeed}ms</span>
+              </label>
+            </div>
           </div>
         </div>
       </div>
