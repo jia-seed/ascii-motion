@@ -571,10 +571,7 @@ export default function Landing() {
 
           {/* right: demo */}
           <div className="flex flex-col items-center justify-center">
-            <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 w-full max-w-md">
-              <HeroAsciiDemo speed={heroSpeed} density={heroDensity} />
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-5 mt-4">
+            <div className="flex flex-wrap items-center justify-center gap-5 mb-4">
               <label className="flex items-center gap-2 text-neutral-400 text-sm">
                 <span>density</span>
                 <input
@@ -600,6 +597,9 @@ export default function Landing() {
                 />
                 <span className="text-neutral-500 text-xs w-8">{heroSpeed}ms</span>
               </label>
+            </div>
+            <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 w-full max-w-md">
+              <HeroAsciiDemo speed={heroSpeed} density={heroDensity} />
             </div>
           </div>
         </div>
