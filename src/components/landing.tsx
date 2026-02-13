@@ -162,139 +162,68 @@ function FeatureDescription({ children }: { children?: React.ReactNode }) {
   );
 }
 
-// ─── animated skeletons for feature cards ───
-function SkeletonUpload() {
-  const [dropped, setDropped] = useState(false);
+// ─── ascii card animation (fetches an SVG and scrambles characters) ───
+function AsciiCard({ src }: { src: string }) {
+  const [chars, setChars] = useState<SvgChar[]>([]);
+  const baseChars = useRef<SvgChar[]>([]);
+  const svgSize = useRef({ width: '100', height: '100' });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setDropped(true);
-      setTimeout(() => setDropped(false), 2000);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="relative flex py-6 h-full items-center justify-center">
-      <div className="w-32 h-24 border-2 border-dashed border-neutral-700 rounded-lg flex items-center justify-center relative overflow-hidden">
-        <AnimatePresence>
-          {dropped ? (
-            <motion.div
-              key="file"
-              initial={{ y: -40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 10, opacity: 0 }}
-              transition={{ duration: 0.4, ease: 'easeOut' }}
-              className="text-white text-2xl"
-            >
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="4" y="2" width="16" height="20" rx="2" />
-                <path d="M8 10h8M8 14h4" />
-              </svg>
-            </motion.div>
-          ) : (
-            <motion.span
-              key="text"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-neutral-600 text-xs"
-            >
-              drop image
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </div>
-      <div className="absolute bottom-0 z-40 inset-x-0 h-10 bg-gradient-to-t from-black to-transparent w-full pointer-events-none" />
-    </div>
-  );
-}
-
-function SkeletonAnalyze() {
-  const [scanY, setScanY] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setScanY((prev) => (prev >= 100 ? 0 : prev + 2));
-    }, 50);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="relative flex py-6 h-full items-center justify-center">
-      <div className="w-32 h-24 bg-neutral-900 rounded-lg relative overflow-hidden">
-        {/* grid pattern */}
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: 'linear-gradient(to right, #525252 1px, transparent 1px), linear-gradient(to bottom, #525252 1px, transparent 1px)',
-          backgroundSize: '8px 8px',
-        }} />
-        {/* scan line */}
-        <motion.div
-          className="absolute left-0 right-0 h-0.5 bg-white"
-          style={{ top: `${scanY}%` }}
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 0.8, repeat: Infinity }}
-        />
-      </div>
-      <div className="absolute bottom-0 z-40 inset-x-0 h-10 bg-gradient-to-t from-black to-transparent w-full pointer-events-none" />
-    </div>
-  );
-}
-
-function SkeletonConvert() {
-  const chars = '@#%&*oahk=:. ';
-  const [grid, setGrid] = useState<string[]>([]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const newGrid: string[] = [];
-      for (let row = 0; row < 6; row++) {
-        let line = '';
-        for (let col = 0; col < 16; col++) {
-          line += chars[Math.floor(Math.random() * chars.length)];
+    fetch(src)
+      .then((res) => res.text())
+      .then((svgText) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgEl = doc.querySelector('svg');
+        if (svgEl) {
+          svgSize.current.width = svgEl.getAttribute('width') || '100';
+          svgSize.current.height = svgEl.getAttribute('height') || '100';
         }
-        newGrid.push(line);
-      }
-      setGrid(newGrid);
-    }, 200);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="relative flex py-6 h-full items-center justify-center">
-      <pre className="text-neutral-300 text-[10px] font-mono leading-tight whitespace-pre select-none">
-        {grid.join('\n')}
-      </pre>
-      <div className="absolute bottom-0 z-40 inset-x-0 h-10 bg-gradient-to-t from-black to-transparent w-full pointer-events-none" />
-    </div>
-  );
-}
-
-function SkeletonAnimate() {
-  const frames = [
-    '  /\\_/\\  \n ( o.o ) \n  > ^ <  ',
-    '  /\\_/\\  \n ( o.o ) \n  > v <  ',
-    '  /\\_/\\  \n ( -.- ) \n  > ^ <  ',
-    '  /\\_/\\  \n ( o.o ) \n  > ^ <  ',
-  ];
-  const [idx, setIdx] = useState(0);
+        const textEls = doc.querySelectorAll('text');
+        const parsed: SvgChar[] = [];
+        textEls.forEach((el) => {
+          parsed.push({
+            x: el.getAttribute('x') || '0',
+            y: el.getAttribute('y') || '0',
+            char: el.textContent || '',
+          });
+        });
+        baseChars.current = parsed;
+        setChars(parsed);
+      });
+  }, [src]);
 
   useEffect(() => {
+    if (baseChars.current.length === 0) return;
     const interval = setInterval(() => {
-      setIdx((prev) => (prev + 1) % frames.length);
+      setChars(
+        baseChars.current.map((c) => ({
+          ...c,
+          char: SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)],
+        }))
+      );
     }, 300);
     return () => clearInterval(interval);
-  }, []);
+  }, [chars.length]);
+
+  if (chars.length === 0) return null;
 
   return (
-    <div className="relative flex py-6 h-full items-center justify-center">
-      <motion.pre
-        key={idx}
-        initial={{ opacity: 0.5 }}
-        animate={{ opacity: 1 }}
-        className="text-neutral-300 text-xs font-mono leading-tight whitespace-pre select-none"
+    <div className="relative flex py-4 h-full items-center justify-center">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${svgSize.current.width} ${svgSize.current.height}`}
+        className="select-none max-h-32"
       >
-        {frames[idx]}
-      </motion.pre>
+        <style>{`text { font-family: monospace; font-size: 8px; fill: #d4d4d4; }`}</style>
+        {chars.map((c, i) => (
+          <text key={i} x={c.x} y={c.y}>
+            {c.char}
+          </text>
+        ))}
+      </svg>
       <div className="absolute bottom-0 z-40 inset-x-0 h-10 bg-gradient-to-t from-black to-transparent w-full pointer-events-none" />
     </div>
   );
@@ -527,25 +456,25 @@ export default function Landing() {
     {
       title: 'upload',
       description: 'drag & drop or click to upload any image. supports png, jpg, gif, and webp.',
-      skeleton: <SkeletonUpload />,
+      skeleton: <AsciiCard src="/ascii-dragon.svg" />,
       className: 'col-span-1 md:col-span-1 lg:col-span-3 border-b md:border-r lg:border-r border-neutral-800',
     },
     {
       title: 'analyze',
       description: 'the image is divided into a grid. each cell\'s brightness is measured to determine the right character.',
-      skeleton: <SkeletonAnalyze />,
+      skeleton: <AsciiCard src="/ascii-mitsuki.svg" />,
       className: 'col-span-1 md:col-span-1 lg:col-span-3 border-b border-neutral-800',
     },
     {
       title: 'convert',
       description: 'brightness maps to ascii characters. dense areas get heavy characters like @#%, light areas get thin ones like .:',
-      skeleton: <SkeletonConvert />,
+      skeleton: <AsciiCard src="/ascii-rubiks.svg" />,
       className: 'col-span-1 md:col-span-1 lg:col-span-3 border-b md:border-b lg:border-b-0 md:border-r lg:border-r border-neutral-800',
     },
     {
       title: 'animate',
       description: 'subtle character variations create a living, breathing ascii animation from your still image.',
-      skeleton: <SkeletonAnimate />,
+      skeleton: <AsciiCard src="/ascii-westwood.svg" />,
       className: 'col-span-1 md:col-span-1 lg:col-span-3 border-neutral-800',
     },
   ];
