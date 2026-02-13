@@ -21,6 +21,7 @@ export interface AsciiOptions {
   fontSize?: number;
   coverageThreshold?: number;
   color?: string;
+  removeBackground?: boolean;
 }
 
 export interface AsciiCell {
@@ -59,6 +60,7 @@ export function imageToAsciiSvg(
     fontSize = 8,
     coverageThreshold = 0.3,
     color = '#d4d4d4',
+    removeBackground = false,
   } = options;
 
   const canvas = document.createElement('canvas');
@@ -80,6 +82,22 @@ export function imageToAsciiSvg(
 
   const imageData = ctx.getImageData(0, 0, imgWidth, imgHeight);
   const pixels = imageData.data;
+
+  // when removeBackground is enabled, detect background color from edges
+  // and make matching pixels transparent so they get filtered out
+  if (removeBackground) {
+    const bgColor = sampleBackgroundColor(pixels, imgWidth, imgHeight);
+    const threshold = 50; // color distance threshold
+    for (let i = 0; i < pixels.length; i += 4) {
+      const dr = pixels[i] - bgColor.r;
+      const dg = pixels[i + 1] - bgColor.g;
+      const db = pixels[i + 2] - bgColor.b;
+      const dist = Math.sqrt(dr * dr + dg * dg + db * db);
+      if (dist < threshold) {
+        pixels[i + 3] = 0; // set alpha to 0
+      }
+    }
+  }
 
   const gridCols = Math.floor(imgWidth / cellWidth);
   const gridRows = Math.floor(imgHeight / cellHeight);
@@ -205,6 +223,39 @@ export function createAsciiSvgAnimation(
   }
 
   return frames;
+}
+
+/**
+ * sample background RGB color from the edges of the image
+ */
+function sampleBackgroundColor(
+  pixels: Uint8ClampedArray,
+  imgWidth: number,
+  imgHeight: number
+): { r: number; g: number; b: number } {
+  let totalR = 0, totalG = 0, totalB = 0;
+  let count = 0;
+  const edgeSize = Math.max(8, Math.floor(Math.min(imgWidth, imgHeight) * 0.05));
+
+  for (let y = 0; y < imgHeight; y++) {
+    for (let x = 0; x < imgWidth; x++) {
+      // only sample pixels along the edges
+      if (x >= edgeSize && x < imgWidth - edgeSize && y >= edgeSize && y < imgHeight - edgeSize) continue;
+      const idx = (y * imgWidth + x) * 4;
+      if (pixels[idx + 3] < 128) continue; // skip transparent
+      totalR += pixels[idx];
+      totalG += pixels[idx + 1];
+      totalB += pixels[idx + 2];
+      count++;
+    }
+  }
+
+  if (count === 0) return { r: 255, g: 255, b: 255 };
+  return {
+    r: Math.round(totalR / count),
+    g: Math.round(totalG / count),
+    b: Math.round(totalB / count),
+  };
 }
 
 /**

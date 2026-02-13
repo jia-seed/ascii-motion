@@ -240,6 +240,7 @@ function TryItSection() {
   const [speed, setSpeed] = useState(150);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [color, setColor] = useState('#d4d4d4');
+  const [removeBackground, setRemoveBackground] = useState(false);
   const [fileName, setFileName] = useState('ascii-motion');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -262,6 +263,7 @@ function TryItSection() {
         cellHeight: Math.round(density * 1.5),
         maxWidth: 120,
         color,
+        removeBackground,
       });
       const animationFrames = createAsciiSvgAnimation(baseResult, 8, { color });
       setFrames(animationFrames);
@@ -269,7 +271,7 @@ function TryItSection() {
       setCurrentFrame(0);
     };
     img.src = imageSrc;
-  }, [imageSrc, density, color]);
+  }, [imageSrc, density, color, removeBackground]);
 
   const processImage = useCallback((file: File) => {
     const reader = new FileReader();
@@ -358,6 +360,23 @@ function TryItSection() {
           drag & drop an image here, or click to upload
         </p>
         <p className="text-neutral-600 text-xs">png, jpg, gif, webp</p>
+      </div>
+
+      {/* background removal toggle */}
+      <div className="max-w-2xl mx-auto mt-3 flex justify-center">
+        <label
+          className="flex items-center gap-2 text-neutral-400 text-sm cursor-pointer select-none"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <input
+            type="checkbox"
+            checked={removeBackground}
+            onChange={(e) => setRemoveBackground(e.target.checked)}
+            className="accent-white w-3.5 h-3.5 cursor-pointer"
+          />
+          <span>clean up background</span>
+          <span className="text-neutral-600 text-xs">(removes noisy backgrounds)</span>
+        </label>
       </div>
 
       {/* ascii output */}
