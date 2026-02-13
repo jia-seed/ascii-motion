@@ -1,7 +1,53 @@
+#!/usr/bin/env node
+
 import sharp from 'sharp';
 import { writeFileSync } from 'fs';
-import { join } from 'path';
+import { basename, extname, resolve } from 'path';
+import { parseArgs } from 'node:util';
 
+// ─── CLI ───
+const { values, positionals } = parseArgs({
+  allowPositionals: true,
+  options: {
+    output: { type: 'string', short: 'o', description: 'Output SVG path (default: <input>.svg)' },
+    density: { type: 'string', short: 'd', default: '6', description: 'Cell width in px (smaller = more detail)' },
+    color: { type: 'string', short: 'c', default: '#d4d4d4', description: 'Fill color for ASCII characters' },
+    'max-width': { type: 'string', short: 'w', default: '120', description: 'Max columns of ASCII output' },
+    'font-size': { type: 'string', short: 'f', default: '8', description: 'Font size in SVG' },
+    threshold: { type: 'string', short: 't', default: '0.3', description: 'Coverage threshold (0-1)' },
+    help: { type: 'boolean', short: 'h', default: false },
+  },
+});
+
+if (values.help || positionals.length === 0) {
+  console.log(`
+ascii-motion convert — turn any image into an ASCII SVG
+
+Usage:
+  node scripts/convert-images.mjs <input> [options]
+  npm run convert -- <input> [options]
+
+Arguments:
+  <input>              Image file (png, jpg, gif, webp)
+
+Options:
+  -o, --output <path>  Output SVG path (default: <input-name>.svg)
+  -d, --density <n>    Cell width in px, smaller = more detail (default: 6)
+  -c, --color <hex>    Fill color for characters (default: #d4d4d4)
+  -w, --max-width <n>  Max columns of ASCII output (default: 120)
+  -f, --font-size <n>  Font size in the SVG (default: 8)
+  -t, --threshold <n>  Coverage threshold 0-1 (default: 0.3)
+  -h, --help           Show this help
+
+Examples:
+  node scripts/convert-images.mjs photo.png
+  node scripts/convert-images.mjs photo.png -o public/ascii-photo.svg -d 4 -c "#ffffff"
+  npm run convert -- photo.png -d 3 --color "#00ff00"
+`);
+  process.exit(0);
+}
+
+// ─── ASCII conversion ───
 const ASCII_RAMP = '@#%&$8BWM*oahkbdpqwmZO0QLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,"^`. ';
 
 const XML_ESCAPE = {
@@ -41,12 +87,14 @@ function computeBackgroundBrightness(pixels, imgWidth, imgHeight, cellWidth, cel
 async function imageToAsciiSvg(imagePath, options = {}) {
   const {
     cellWidth = 6,
-    cellHeight = 9,
+    cellHeight,
     maxWidth = 120,
     fontSize = 8,
     coverageThreshold = 0.3,
     color = '#d4d4d4',
   } = options;
+
+  const actualCellHeight = cellHeight ?? Math.round(cellWidth * 1.5);
 
   const image = sharp(imagePath);
   const metadata = await image.metadata();
@@ -67,22 +115,22 @@ async function imageToAsciiSvg(imagePath, options = {}) {
     .toBuffer({ resolveWithObject: true });
 
   const gridCols = Math.floor(imgWidth / cellWidth);
-  const gridRows = Math.floor(imgHeight / cellHeight);
+  const gridRows = Math.floor(imgHeight / actualCellHeight);
 
-  const bgBrightness = computeBackgroundBrightness(pixels, imgWidth, imgHeight, cellWidth, cellHeight);
+  const bgBrightness = computeBackgroundBrightness(pixels, imgWidth, imgHeight, cellWidth, actualCellHeight);
 
   const cells = [];
 
   for (let row = 0; row < gridRows; row++) {
     for (let col = 0; col < gridCols; col++) {
       const startX = col * cellWidth;
-      const startY = row * cellHeight;
+      const startY = row * actualCellHeight;
 
       let totalBrightness = 0;
       let coveredPixels = 0;
       let totalPixels = 0;
 
-      for (let y = startY; y < startY + cellHeight && y < imgHeight; y++) {
+      for (let y = startY; y < startY + actualCellHeight && y < imgHeight; y++) {
         for (let x = startX; x < startX + cellWidth && x < imgWidth; x++) {
           const idx = (y * imgWidth + x) * 4;
           const r = pixels[idx];
@@ -114,14 +162,14 @@ async function imageToAsciiSvg(imagePath, options = {}) {
       cells.push({
         char,
         x: startX,
-        y: startY + cellHeight,
+        y: startY + actualCellHeight,
         brightness: avgBrightness,
       });
     }
   }
 
   const svgWidth = gridCols * cellWidth;
-  const svgHeight = gridRows * cellHeight;
+  const svgHeight = gridRows * actualCellHeight;
 
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}">\n`;
   svg += `  <style>text { font-family: monospace; font-size: ${fontSize}px; fill: ${color}; }</style>\n`;
@@ -132,25 +180,26 @@ async function imageToAsciiSvg(imagePath, options = {}) {
 
   svg += `</svg>`;
 
-  return svg;
+  return { svg, cells: cells.length, gridCols, gridRows };
 }
 
-const publicDir = join(import.meta.dirname, '..', 'public');
+// ─── Run ───
+const inputPath = resolve(positionals[0]);
+const cellWidth = parseInt(values.density);
+const defaultOutput = basename(inputPath, extname(inputPath)) + '.svg';
+const outputPath = resolve(values.output || defaultOutput);
 
-const images = [
-  { file: 'dragon.png', output: 'ascii-dragon.svg' },
-  { file: 'mistukicomputer.jpg', output: 'ascii-mitsuki.svg' },
-  { file: 'rubiks.webp', output: 'ascii-rubiks.svg' },
-  { file: 'westwood.jpg', output: 'ascii-westwood.svg' },
-];
+console.log(`Converting ${basename(inputPath)}...`);
+console.log(`  density: ${cellWidth}px  color: ${values.color}  max-width: ${values['max-width']} cols`);
 
-for (const { file, output } of images) {
-  const inputPath = join(publicDir, file);
-  const outputPath = join(publicDir, output);
-  console.log(`Converting ${file} -> ${output}...`);
-  const svg = await imageToAsciiSvg(inputPath);
-  writeFileSync(outputPath, svg);
-  console.log(`  Done.`);
-}
+const { svg, cells, gridCols, gridRows } = await imageToAsciiSvg(inputPath, {
+  cellWidth,
+  maxWidth: parseInt(values['max-width']),
+  fontSize: parseInt(values['font-size']),
+  coverageThreshold: parseFloat(values.threshold),
+  color: values.color,
+});
 
-console.log('All conversions complete.');
+writeFileSync(outputPath, svg);
+console.log(`  ${cells} characters in ${gridCols}x${gridRows} grid`);
+console.log(`  Saved to ${outputPath}`);
