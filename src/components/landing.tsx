@@ -461,14 +461,21 @@ function TryItSection() {
               />
               <span className="text-neutral-500 text-xs w-8">{speed}ms</span>
             </label>
-            <label className="flex items-center gap-2 text-neutral-400 text-sm">
+            <label className="flex items-center gap-2 text-neutral-400 text-sm cursor-pointer">
               <span>color</span>
-              <input
-                type="color"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-6 h-6 rounded cursor-pointer border-none bg-transparent [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch]:border-none"
-              />
+              <span className="relative">
+                <input
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <span
+                  className="block w-5 h-5 rounded border border-neutral-700"
+                  style={{ backgroundColor: color }}
+                />
+              </span>
+              <span className="text-neutral-500 text-xs">{color}</span>
             </label>
             <button
               onClick={() => setIsAnimating(!isAnimating)}
@@ -620,14 +627,21 @@ export default function Landing() {
                 />
                 <span className="text-neutral-500 text-xs w-8">{heroSpeed}ms</span>
               </label>
-              <label className="flex items-center gap-2 text-neutral-400 text-sm">
+              <label className="flex items-center gap-2 text-neutral-400 text-sm cursor-pointer">
                 <span>color</span>
-                <input
-                  type="color"
-                  value={heroColor}
-                  onChange={(e) => setHeroColor(e.target.value)}
-                  className="w-6 h-6 rounded cursor-pointer border-none bg-transparent [&::-webkit-color-swatch-wrapper]:p-0 [&::-webkit-color-swatch]:rounded [&::-webkit-color-swatch]:border-none"
-                />
+                <span className="relative">
+                  <input
+                    type="color"
+                    value={heroColor}
+                    onChange={(e) => setHeroColor(e.target.value)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <span
+                    className="block w-5 h-5 rounded border border-neutral-700"
+                    style={{ backgroundColor: heroColor }}
+                  />
+                </span>
+                <span className="text-neutral-500 text-xs">{heroColor}</span>
               </label>
             </div>
             <div className="bg-neutral-900/50 border border-neutral-800 rounded-lg p-4 w-full max-w-md">
