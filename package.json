@@ -2,6 +2,9 @@
   "name": "ascii-motion",
   "version": "0.1.0",
   "private": true,
+  "exports": {
+    "./convert": "./convert.mjs"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

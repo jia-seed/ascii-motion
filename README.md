@@ -170,6 +170,72 @@ threshold 0.5 (strict)    threshold 0.15 (loose)
 -c "#00ff41"   # matrix green
 ```
 
+## api
+
+use the converter programmatically in your own scripts or apps.
+
+```js
+import { imageToAsciiSvg } from 'ascii-motion/convert'
+```
+
+### imageToAsciiSvg(imagePath, options?)
+
+converts an image file to an ascii svg string.
+
+```js
+const { svg, cells, gridCols, gridRows } = await imageToAsciiSvg('photo.png', {
+  cellWidth: 4,
+  color: '#ffffff',
+})
+```
+
+**options**
+
+| option | type | default | description |
+|---|---|---|---|
+| `cellWidth` | number | 6 | cell width in px (smaller = more detail) |
+| `cellHeight` | number | cellWidth * 1.5 | cell height in px |
+| `maxWidth` | number | 120 | max columns of ascii output |
+| `fontSize` | number | 8 | font size in the svg |
+| `coverageThreshold` | number | 0.3 | min cell coverage to place a character (0-1) |
+| `color` | string | #d4d4d4 | fill color for ascii characters |
+
+**returns** `Promise<object>`
+
+| field | type | description |
+|---|---|---|
+| `svg` | string | the full svg markup |
+| `cells` | number | total characters placed |
+| `gridCols` | number | columns in the ascii grid |
+| `gridRows` | number | rows in the ascii grid |
+
+### examples
+
+```js
+import { imageToAsciiSvg } from 'ascii-motion/convert'
+import { writeFileSync } from 'fs'
+
+// basic
+const { svg } = await imageToAsciiSvg('photo.png')
+writeFileSync('output.svg', svg)
+
+// high detail, white on black
+const result = await imageToAsciiSvg('photo.png', {
+  cellWidth: 3,
+  color: '#ffffff',
+  maxWidth: 200,
+})
+writeFileSync('output.svg', result.svg)
+console.log(`${result.cells} characters in ${result.gridCols}x${result.gridRows} grid`)
+
+// loose threshold to capture subtle edges
+const { svg: detailed } = await imageToAsciiSvg('photo.png', {
+  coverageThreshold: 0.15,
+})
+```
+
+> requires `sharp` as a peer dependency (included with next.js projects).
+
 ## dev
 
 ```bash
