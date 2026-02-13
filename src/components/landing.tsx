@@ -114,9 +114,8 @@ function HeroAsciiDemo({ speed, density, color }: { speed: number; density: numb
         viewBox={`0 0 ${svgSize.current.width} ${svgSize.current.height}`}
         className="select-none"
       >
-        <style>{`text { font-family: monospace; font-size: 8px; fill: ${color}; }`}</style>
         {chars.map((c, i) => (
-          <text key={i} x={c.x} y={c.y}>
+          <text key={i} x={c.x} y={c.y} fill={color} fontFamily="monospace" fontSize="8">
             {c.char}
           </text>
         ))}
@@ -217,9 +216,8 @@ function AsciiCard({ src }: { src: string }) {
         viewBox={`0 0 ${svgSize.current.width} ${svgSize.current.height}`}
         className="select-none max-h-32"
       >
-        <style>{`text { font-family: monospace; font-size: 8px; fill: #d4d4d4; }`}</style>
         {chars.map((c, i) => (
-          <text key={i} x={c.x} y={c.y}>
+          <text key={i} x={c.x} y={c.y} fill="#d4d4d4" fontFamily="monospace" fontSize="8">
             {c.char}
           </text>
         ))}
