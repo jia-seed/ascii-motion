@@ -1,6 +1,6 @@
 # ascii motion
 
-turn any image into animated ascii art. upload an image and watch it come alive as text characters.
+turn any image into animated ascii art
 
 ## how it works
 
