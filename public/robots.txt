@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://www.jorianhoover.com/sitemap.xml
+
+# Crawl-delay (optional, adjust if needed)
+Crawl-delay: 1
