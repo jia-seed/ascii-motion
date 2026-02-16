@@ -315,7 +315,7 @@ function TryItSection() {
   return (
     <div id="try-it" className="mt-20 px-4 md:px-8 scroll-mt-20">
       <h2 className="text-2xl md:text-3xl font-medium text-white text-center mb-12">
-        try it
+        Try Our ASCII Art Generator
       </h2>
 
       {/* upload zone */}
@@ -349,6 +349,7 @@ function TryItSection() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
+          aria-label="Upload image icon"
         >
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
           <polyline points="17 8 12 3 7 8" />
@@ -507,15 +508,15 @@ export default function Landing() {
           {/* left: content */}
           <div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl tracking-tight font-medium mb-6">
-              <ShinyText text="ascii motion" speed={3} />
+              <ShinyText text="ASCII Art Generator" speed={3} />
             </h1>
 
             <p className="text-lg md:text-xl text-neutral-300 font-normal leading-snug mb-4">
-              turn any image into animated ascii art.
+              Convert any image into animated ASCII art online - completely free.
             </p>
 
             <p className="text-sm md:text-base text-neutral-400 font-normal leading-relaxed mb-8">
-              upload an image and watch it come alive as ascii characters. adjust density, speed, and download your creation.
+              Upload an image and watch it transform into living ASCII characters. Our advanced algorithm analyzes brightness levels and converts them into text art. Customize density, animation speed, colors, and download your creation as an SVG file. Perfect for developers, artists, and anyone who loves creative text art.
             </p>
 
             <button
@@ -600,7 +601,7 @@ export default function Landing() {
       {/* how it works */}
       <div id="how-it-works" className="relative scroll-mt-20 px-4 md:px-0">
         <h2 className="text-2xl md:text-3xl font-medium text-white text-center mb-8">
-          how it works
+          How Our ASCII Art Converter Works
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 border rounded-md border-neutral-800">
           {features.map((feature) => (
@@ -616,9 +617,43 @@ export default function Landing() {
       {/* try it */}
       <TryItSection />
 
+      {/* features */}
+      <div className="mt-16 px-4 md:px-8">
+        <h2 className="text-2xl md:text-3xl font-medium text-white text-center mb-8">
+          Why Choose Our ASCII Art Generator?
+        </h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="text-center p-6">
+            <h3 className="text-xl font-medium text-white mb-3">100% Free</h3>
+            <p className="text-neutral-400 text-sm">No subscriptions, no watermarks. Create unlimited ASCII art conversions at no cost.</p>
+          </div>
+          <div className="text-center p-6">
+            <h3 className="text-xl font-medium text-white mb-3">Multiple Formats</h3>
+            <p className="text-neutral-400 text-sm">Supports PNG, JPG, GIF, and WebP image formats for maximum compatibility.</p>
+          </div>
+          <div className="text-center p-6">
+            <h3 className="text-xl font-medium text-white mb-3">Instant Preview</h3>
+            <p className="text-neutral-400 text-sm">See your ASCII art come to life in real-time with our interactive preview system.</p>
+          </div>
+          <div className="text-center p-6">
+            <h3 className="text-xl font-medium text-white mb-3">Customizable</h3>
+            <p className="text-neutral-400 text-sm">Adjust character density, animation speed, and colors to match your vision perfectly.</p>
+          </div>
+          <div className="text-center p-6">
+            <h3 className="text-xl font-medium text-white mb-3">High Quality Output</h3>
+            <p className="text-neutral-400 text-sm">Download your ASCII art as crisp SVG files that scale perfectly at any size.</p>
+          </div>
+          <div className="text-center p-6">
+            <h3 className="text-xl font-medium text-white mb-3">Privacy First</h3>
+            <p className="text-neutral-400 text-sm">All processing happens in your browser. Your images never leave your device.</p>
+          </div>
+        </div>
+      </div>
+
       {/* footer */}
       <div className="mt-20 text-center">
-        <p className="text-neutral-600 text-sm">ascii motion</p>
+        <p className="text-neutral-600 text-sm">ASCII Motion - Free Online ASCII Art Generator</p>
+        <p className="text-neutral-700 text-xs mt-2">Convert images to animated ASCII art | Text art creator | Image to ASCII converter</p>
       </div>
     </div>
   );
