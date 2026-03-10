@@ -1,0 +1,19 @@
+{
+  "name": "@jia-seed/ascii-motion-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for converting images to ASCII art SVGs",
+  "type": "module",
+  "bin": {
+    "ascii-motion-mcp": "./server.mjs"
+  },
+  "files": [
+    "server.mjs",
+    "convert.mjs"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "sharp": "^0.33.0"
+  },
+  "keywords": ["mcp", "ascii", "art", "image", "svg", "claude"],
+  "license": "MIT"
+}
