@@ -19,19 +19,21 @@ function Navbar() {
         as="nav"
         className="dark:bg-black bg-black text-white px-6 py-2 flex items-center gap-6"
       >
-        <a href="/" className="font-medium text-sm hover:text-neutral-300 transition-colors">
+        <a href="/" className="font-medium text-sm hover:text-neutral-300 transition-colors" title="ASCII Motion - Home">
           ascii motion
         </a>
         <div className="h-4 w-px bg-neutral-700" />
         <button
           onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
           className="text-neutral-400 hover:text-white transition-colors text-sm"
+          title="Learn how ASCII Motion converts images to ASCII art"
         >
           how it works
         </button>
         <button
           onClick={() => document.getElementById('try-it')?.scrollIntoView({ behavior: 'smooth' })}
           className="text-neutral-400 hover:text-white transition-colors text-sm"
+          title="Try the ASCII Motion image converter tool"
         >
           try it
         </button>
@@ -113,6 +115,9 @@ function HeroAsciiDemo({ speed, density, color }: { speed: number; density: numb
         height="100%"
         viewBox={`0 0 ${svgSize.current.width} ${svgSize.current.height}`}
         className="select-none"
+        alt="Animated ASCII art demo"
+        role="img"
+        aria-label="Animated ASCII character demonstration"
       >
         {chars.map((c, i) => (
           <text key={i} x={c.x} y={c.y} fill={color} fontFamily="monospace" fontSize="8">
@@ -215,6 +220,9 @@ function AsciiCard({ src }: { src: string }) {
         height="100%"
         viewBox={`0 0 ${svgSize.current.width} ${svgSize.current.height}`}
         className="select-none max-h-32"
+        alt="ASCII art preview"
+        role="img"
+        aria-label="ASCII art character animation preview"
       >
         {chars.map((c, i) => (
           <text key={i} x={c.x} y={c.y} fill="#d4d4d4" fontFamily="monospace" fontSize="8">
@@ -313,9 +321,9 @@ function TryItSection() {
   }, [frames, currentFrame, fileName]);
 
   return (
-    <div id="try-it" className="mt-20 px-4 md:px-8 scroll-mt-20">
+    <section id="try-it" className="mt-20 px-4 md:px-8 scroll-mt-20">
       <h2 className="text-2xl md:text-3xl font-medium text-white text-center mb-12">
-        try it
+        Try ASCII Motion Converter
       </h2>
 
       {/* upload zone */}
@@ -349,6 +357,9 @@ function TryItSection() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
+          alt="Upload icon"
+          role="img"
+          aria-label="Upload image icon"
         >
           <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
           <polyline points="17 8 12 3 7 8" />
@@ -459,7 +470,7 @@ function TryItSection() {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
@@ -471,26 +482,26 @@ export default function Landing() {
 
   const features = [
     {
-      title: 'upload',
-      description: 'drag & drop or click to upload any image. supports png, jpg, gif, and webp.',
+      title: 'Upload Images',
+      description: 'Drag and drop or click to upload any image format. Our converter supports PNG, JPG, GIF, and WebP files for maximum compatibility.',
       skeleton: <AsciiCard src="/ascii-dragon.svg" />,
       className: 'col-span-1 md:col-span-1 lg:col-span-3 border-b md:border-r lg:border-r border-neutral-800',
     },
     {
-      title: 'analyze',
-      description: 'the image is divided into a grid. each cell\'s brightness is measured to determine the right character.',
+      title: 'Analyze Brightness',
+      description: 'The image is divided into a precise grid system. Each cell\'s brightness level is measured and analyzed to determine the perfect ASCII character match.',
       skeleton: <AsciiCard src="/ascii-mitsuki.svg" />,
       className: 'col-span-1 md:col-span-1 lg:col-span-3 border-b border-neutral-800',
     },
     {
-      title: 'convert',
-      description: 'brightness maps to ascii characters. dense areas get heavy characters like @#%, light areas get thin ones like .:',
+      title: 'Convert to ASCII',
+      description: 'Brightness values map to specific ASCII characters. Dense dark areas get heavy characters like @#%, while light areas get thin ones like .: for perfect contrast.',
       skeleton: <AsciiCard src="/ascii-rubiks.svg" />,
       className: 'col-span-1 md:col-span-1 lg:col-span-3 border-b md:border-b lg:border-b-0 md:border-r lg:border-r border-neutral-800',
     },
     {
-      title: 'animate',
-      description: 'subtle character variations create a living, breathing ascii animation from your still image.',
+      title: 'Create Animation',
+      description: 'Subtle character variations and transitions create a living, breathing ASCII animation effect that brings your static images to life with mesmerizing motion.',
       skeleton: <AsciiCard src="/ascii-westwood.svg" />,
       className: 'col-span-1 md:col-span-1 lg:col-span-3 border-neutral-800',
     },
@@ -511,16 +522,18 @@ export default function Landing() {
             </h1>
 
             <p className="text-lg md:text-xl text-neutral-300 font-normal leading-snug mb-4">
-              turn any image into animated ascii art.
+              Transform any image into captivating animated ASCII art with our powerful online converter tool.
             </p>
 
             <p className="text-sm md:text-base text-neutral-400 font-normal leading-relaxed mb-8">
-              upload an image and watch it come alive as ascii characters. adjust density, speed, and download your creation.
+              Upload photos, drawings, or any image and watch them come alive as dancing ASCII characters. Our advanced algorithm analyzes image brightness and converts pixels into corresponding text characters. Customize density for detail control, adjust animation speed for perfect motion effects, choose custom colors, and download your unique ASCII art creations as scalable SVG files. Perfect for digital art projects, social media content, presentations, and creative web design.
             </p>
 
             <button
               onClick={() => document.getElementById('try-it')?.scrollIntoView({ behavior: 'smooth' })}
               className="inline-flex items-center gap-3 bg-white hover:bg-neutral-200 border border-neutral-300 hover:border-white text-black px-6 py-3 rounded-lg font-mono text-sm cursor-pointer transition-all relative overflow-hidden"
+              title="Start converting your images to ASCII art"
+              aria-label="Upload and convert your image to animated ASCII art"
               style={{
                 backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
                 backgroundBlendMode: 'overlay',
@@ -598,9 +611,9 @@ export default function Landing() {
       </div>
 
       {/* how it works */}
-      <div id="how-it-works" className="relative scroll-mt-20 px-4 md:px-0">
+      <section id="how-it-works" className="relative scroll-mt-20 px-4 md:px-0">
         <h2 className="text-2xl md:text-3xl font-medium text-white text-center mb-8">
-          how it works
+          How ASCII Motion Works
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 border rounded-md border-neutral-800">
           {features.map((feature) => (
@@ -617,9 +630,16 @@ export default function Landing() {
       <TryItSection />
 
       {/* footer */}
-      <div className="mt-20 text-center">
-        <p className="text-neutral-600 text-sm">ascii motion</p>
-      </div>
+      <footer className="mt-20 text-center">
+        <p className="text-neutral-600 text-sm">
+          ASCII Motion - Professional Image to ASCII Art Converter | 
+          <a href="#how-it-works" className="hover:text-neutral-400 transition-colors ml-1" title="Learn how ASCII conversion works">How it Works</a> | 
+          <a href="#try-it" className="hover:text-neutral-400 transition-colors ml-1" title="Try the ASCII art converter">Try Now</a>
+        </p>
+        <p className="text-neutral-700 text-xs mt-2">
+          Convert images to animated ASCII art • Support for PNG, JPG, GIF, WebP • Customizable animations • SVG output
+        </p>
+      </footer>
     </div>
   );
 }
